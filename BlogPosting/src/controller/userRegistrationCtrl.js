@@ -11,15 +11,40 @@ routerUser.post(
   async (req, res) => {
     try {
       const user = new userModel(req.body);
-      console.log(user);
+      // console.log(user);
+
+      if (
+        req.body.fname == '' ||
+        req.body.lname == '' ||
+        req.body.email == ''
+      ) {
+        res.send({
+          success: false,
+          message: 'All Fields Are Required',
+        });
+      }
+
       await user.save();
 
       const token = await user.generateAuthToken();
+      console.log(token);
 
-      res.status(201).send({ user, token });
-      res.status(201).send('Added Successfully');
+      // res.status(201).send({ token });
+
+      res.send({
+        token,
+        success: true,
+        message: 'Added Successfully',
+        // user,
+      });
+      // res.status(200).json('Added Successfully');
+      // res.status(201).send('Added Successfully');
     } catch (e) {
-      res.status(400).send(e);
+      res.send({
+        success: false,
+        message: 'Faild To Signup,please Try Again',
+        e: e.message,
+      });
     }
   }
   // try {
@@ -43,74 +68,9 @@ routerUser.post(
   // }
 );
 
-// -- Read/Select User -- //
-
-routerUser.get('/users', async (req, res) => {
-  try {
-    const userGet = await userModel.find();
-
-    res.status(201).send(userGet);
-  } catch (e) {
-    res.status(400).send('Error' + e);
-  }
-});
-
-// -- Read/Select User By Id -- //
-
-routerUser.get('/users/:id', async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const userGetId = await userModel.findById(_id);
-
-    if (!userGetId) {
-      return res.status(404).send(userGetId);
-    } else {
-      res.status(201).send(userGetId);
-    }
-  } catch (e) {
-    res.status(400).send('Error' + e);
-  }
-});
-
-// -- Update User By Id -- //
-
-routerUser.put('/users/:id', async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const userUpdate = await userModel.findByIdAndUpdate(_id, req.body, {
-      new: true,
-    });
-
-    if (!userUpdate) {
-      return res.status(404).send(userUpdate);
-    } else {
-      res.status(201).send(userUpdate);
-    }
-  } catch (e) {
-    res.status(400).send('Error' + e);
-  }
-});
-
-// -- Delete User By Id -- //
-
-routerUser.delete('/users/:id', async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const userDelete = await userModel.findByIdAndDelete(_id);
-
-    if (!userDelete) {
-      return res.status(404).send(userDelete);
-    } else {
-      res.status(201).send(userDelete);
-    }
-  } catch (e) {
-    res.status(400).send('Error' + e);
-  }
-});
-
 // -- Login --//
 
-routerUser.post('/users/login', auth, async (req, res) => {
+routerUser.post('/users/login', async (req, res) => {
   try {
     console.log(req.body);
     const user = await userModel.findByCredentials(
@@ -118,10 +78,93 @@ routerUser.post('/users/login', auth, async (req, res) => {
       req.body.password
     );
     console.log(user);
+
     const token = await user.generateAuthToken();
-    res.send({ user, token });
+    console.log(token);
+
+    res.send({
+      token,
+      success: true,
+      message: 'Login Succesfullyy',
+      // user,
+    });
+    // res.json('Login Succesfully');
+    // res.json({ user, token });
   } catch (e) {
-    res.status(404).send();
+    // res.status(404).json();
+    res.send({
+      success: false,
+      message: 'Unable to login,please Try Again',
+      e: e.message,
+    });
+  }
+});
+
+// -- Read/Select User -- //
+
+routerUser.get('/users', auth, async (req, res) => {
+  try {
+    const userGet = await userModel.find();
+
+    //res.status(200).json('Added Successfully');
+    res.status(201).json(userGet);
+  } catch (e) {
+    res.status(400).json('Error' + e);
+  }
+});
+
+// -- Read/Select User By Id -- //
+
+routerUser.get('/users/:id', auth, async (req, res) => {
+  try {
+    const _id = req.params.id;
+    const userGetId = await userModel.findById(_id);
+    console.log(userGetId);
+    if (!userGetId) {
+      return res.status(404).send(userGetId);
+    } else {
+      res.status(201).send(userGetId);
+    }
+    // res.status(201).json(userGetId);
+  } catch (e) {
+    res.status(400).json('Error' + e);
+  }
+});
+
+// -- Update User By Id -- //
+
+routerUser.put('/users/:id', auth, async (req, res) => {
+  try {
+    const _id = req.params.id;
+    const userUpdate = await userModel.findByIdAndUpdate(_id, req.body, {
+      new: true,
+    });
+
+    // if (!userUpdate) {
+    //   return res.status(404).json(userUpdate);
+    // } else {
+    //   res.status(201).json(userUpdate);
+    // }
+    res.status(201).json('Update Successfully');
+  } catch (e) {
+    res.status(400).json('Error' + e);
+  }
+});
+
+// -- Delete User By Id -- //
+
+routerUser.delete('/users/:id', auth, async (req, res) => {
+  try {
+    const _id = req.params.id;
+    const userDelete = await userModel.findByIdAndDelete(_id);
+
+    if (!userDelete) {
+      return res.status(404).json(userDelete);
+    } else {
+      res.status(201).json('Deleted Succesfully');
+    }
+  } catch (e) {
+    res.status(400).json('Error' + e);
   }
 });
 
@@ -132,9 +175,9 @@ routerUser.post('/users/logout', auth, async (req, res) => {
     });
     await req.user.save();
 
-    res.send();
+    res.json('Logout');
   } catch (e) {
-    res.status(500).send();
+    res.status(500).json();
   }
 });
 
@@ -142,14 +185,14 @@ routerUser.post('/users/logoutAll', auth, async (req, res) => {
   try {
     req.user.tokens = [];
     await req.user.save();
-    res.send('Logged out');
+    res.json('Logged out');
   } catch (e) {
-    res.status(500).send();
+    res.status(500).json();
   }
 });
 
 routerUser.get('/users/me', auth, async (req, res) => {
-  res.send(req.user);
+  res.json(req.user);
 });
 
 // routerUser.post('/login', async (req, res) => {

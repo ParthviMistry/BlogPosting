@@ -15,7 +15,7 @@ const routerPost = require('./controller/postCtrl');
 const auth = require('./middelware/auth');
 const upload = require('./middelware/upload');
 
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 5000 || 3000;
 
 app.use(express.json());
 app.use(routerUser);
@@ -38,17 +38,17 @@ app.use(upload.array());
 // console.log(static_path);
 // app.use(express.static(static_path));
 
-const myFunction = async () => {
-  const token = jwt.sign({ _id: 'abc123' }, 'BlogPosting', {
-    expiresIn: '7 days',
-  });
-  console.log('myfunction  token: ' + token);
+// const myFunction = async () => {
+//   const token = jwt.sign({ _id: 'abc123' }, 'BlogPosting', {
+//     expiresIn: '7 days',
+//   });
+//   console.log('myfunction  token: ' + token);
 
-  const data = jwt.verify(token, 'BlogPosting');
-  console.log(data);
-};
+//   const data = jwt.verify(token, 'BlogPosting');
+//   console.log(data);
+// };
 
-myFunction();
+// myFunction();
 
 app.listen(port, () => {
   console.log('Running on ' + port);

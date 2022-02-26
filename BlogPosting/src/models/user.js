@@ -40,32 +40,54 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    tokens: [
-      {
-        token: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
+    // tokens: [
+    //   {
+    //     token: {
+    //       type: String,
+    //       required: true,
+    //     },
+    //   },
+    // ],
   },
   { timestamps: true }
 );
 
-UserSchema.methods.generateAuthToken = async function () {
-  const user = this;
+// UserSchema.methods.generateAuthToken = async function (_id) {
+//   // const user = this;
 
-  const token = jwt.sign({ _id: user._id.toString() }, 'BlogPosting');
+//   // const token = jwt.sign({ _id: user._id.toString() }, 'BlogPosting');
 
-  user.tokens = user.tokens.concat({ token });
-  await user.save();
+//   // user.tokens = user.tokens.concat({ token });
+//   // await user.save();
 
-  return token;
+//   // return token;
+
+//   try {
+//     const token = jwt.sign({ _id }, 'BlogPosting', {
+//       expiresIn: '1 days',
+//     });
+//     return token;
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+UserSchema.methods.generateAuthToken = () => {
+  // const _id = req.params.id;
+  try {
+    const token = jwt.sign({ _id: 'abc123' }, 'BlogPosting', {
+      expiresIn: '1 days',
+    });
+    // console.log(token);
+    return token;
+  } catch (err) {
+    console.log(err);
+  }
 };
 
-UserSchema.statics.findByCredentials = async (email, password) => {
+UserSchema.statics.findByCredentials = async (email, password, res) => {
   const user = await userModel.findOne({ email });
-  console.log(user);
+  // console.log(user);
 
   if (!user) {
     throw new Error('Unable to login');
@@ -73,7 +95,16 @@ UserSchema.statics.findByCredentials = async (email, password) => {
   const isMatch = await bcrypt.compare(password, user.password);
   console.log(isMatch);
 
-  if (!isMatch) {
+  // if (!isMatch) {
+  //   throw new Error('Unable to login');
+  // }
+
+  if (isMatch) {
+    const token = await user.generateAuthToken();
+    user.toJSON = function () {
+      return { email, token };
+    };
+  } else {
     throw new Error('Unable to login');
   }
 

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 // const validator = require('validator');
 const auth = require('../middelware/auth');
+const userModel = require('./user');
 
 const postSchema = new mongoose.Schema({
   title: {
@@ -21,18 +22,33 @@ const postSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+
+  like: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'user',
+    },
+  ],
+  comments: [
+    {
+      type: String,
+      optional: true,
+    },
+  ],
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'user',
+  },
+  topic: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'topic',
+  },
   dateCreated: {
     type: Date,
     default: Date.now,
     required: true,
-  },
-  like: {
-    type: Number,
-    default: 0,
-  },
-  comments: {
-    text: { type: String },
-    postedBy: { type: mongoose.Schema.Types.ObjectId },
   },
   // avatar: { type: String },
 });
